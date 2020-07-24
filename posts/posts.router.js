@@ -4,8 +4,16 @@ const db = require("../data/db.js");
 const router = express.Router();
 
 router.get("/", (req, res) => {
-  db.find;
+  db.find()
+    .then((post) => {
+      res.status(201).json({ data: post });
+    })
+    .catch((err) => {
+      res
+        .status(500)
+        .json({ error: "The posts information could not be retrieved." });
     });
+});
 
 router.get("/:id", (req, res) => {});
 
