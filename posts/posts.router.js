@@ -15,7 +15,26 @@ router.get("/", (req, res) => {
     });
 });
 
-router.get("/:id", (req, res) => {});
+router.get("/:id", (req, res) => {
+  const postData = req.params;
+  
+  db.findById(postData)
+    .then((post) => {
+      console.log(postData)
+      if (postData.id) {
+        res
+          .status(404)
+          .json({ message: "The post with the specified ID does not exist." });
+      }
+    })
+    .catch((err) => {
+      res
+        .status(500)
+        .json({ error: "The post information could not be retrieved." });
+    });
+});
+
+router.get("/:id/comments", (req, res) => {});
 
 router.post("/", (req, res) => {
   const postData = req.body;
