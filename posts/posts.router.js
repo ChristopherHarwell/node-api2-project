@@ -1,6 +1,6 @@
 const express = require("express");
 const db = require("../data/db.js");
-const { findById } = require("../data/db.js");
+const { findById, findCommentById } = require("../data/db.js");
 
 const router = express.Router();
 
@@ -35,7 +35,22 @@ router.get("/:id", (req, res) => {
   }
 });
 
-router.get("/:id/comments", (req, res) => {});
+// Returns an array of all the comment
+// objects associated with the post with the specified id.
+//TODO test this after making a post request that adds comments
+router.get("/:id/comments", (req, res) => {
+  const { id } = req.params;
+
+  try {
+    findCommentById(id).then((comment) => {
+      res.status(201).json({ data: comment });
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "The post information could not be retrieved." });
+  }
+});
 
 router.post("/", (req, res) => {
   const postData = req.body;
@@ -53,6 +68,7 @@ router.post("/", (req, res) => {
   }
 });
 
+router.post(":id/comments", (req, res) => {});
 router.delete(":/id", (req, res) => {});
 
 router.put(":/id", (req, res) => {});
