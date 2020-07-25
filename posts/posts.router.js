@@ -1,5 +1,6 @@
 const express = require("express");
 const db = require("../data/db.js");
+const { findById } = require("../data/db.js");
 
 const router = express.Router();
 
@@ -16,22 +17,22 @@ router.get("/", (req, res) => {
 });
 
 router.get("/:id", (req, res) => {
-  const postData = req.params;
-  
-  db.findById(postData)
-    .then((post) => {
-      console.log(postData)
-      if (postData.id) {
+  const { id } = req.params;
+  try {
+    findById(id).then(([item]) => {
+      if (item === undefined) {
         res
           .status(404)
           .json({ message: "The post with the specified ID does not exist." });
+      } else {
+        res.status(201).json({ data: item });
       }
-    })
-    .catch((err) => {
-      res
-        .status(500)
-        .json({ error: "The post information could not be retrieved." });
     });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "The post information could not be retrieved." });
+  }
 });
 
 router.get("/:id/comments", (req, res) => {});
