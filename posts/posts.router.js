@@ -1,11 +1,17 @@
 const express = require("express");
-const db = require("../data/db.js");
-const { findById, findCommentById } = require("../data/db.js");
+const {
+  insert,
+  find,
+  findById,
+  insertComment,
+  findCommentById,
+  remove,
+} = require("../data/db.js");
 
 const router = express.Router();
 
 router.get("/", (req, res) => {
-  db.find()
+  find()
     .then((post) => {
       res.status(201).json({ data: post });
     })
@@ -40,7 +46,6 @@ router.get("/:id", (req, res) => {
 //TODO test this after making a post request that adds comments
 router.get("/:id/comments", (req, res) => {
   const { id } = req.params;
-
   try {
     findCommentById(id).then((comment) => {
       res.status(201).json({ data: comment });
@@ -54,7 +59,7 @@ router.get("/:id/comments", (req, res) => {
 
 router.post("/", (req, res) => {
   const postData = req.body;
-  db.insert(postData);
+  insert(postData);
   try {
     if (postData.title && postData.contents) {
       res.status(201).json(postData);
@@ -68,9 +73,45 @@ router.post("/", (req, res) => {
   }
 });
 
-router.post(":id/comments", (req, res) => {});
-router.delete(":/id", (req, res) => {});
+// Creates a comment for the post with the specified
+// id using information sent inside of the request body.
 
+/**
+ * insertComment(): calling insertComment while passing 
+ * it a comment object will add it to the database and 
+ * return a promise that resolves to an object with the 
+ * id of the inserted comment. The object looks like this: 
+ * { id: 123 }. This method will throw an error if the post
+ * _id field in the comment object does not match a valid 
+ * post id in the database.
+
+*/
+
+// TODO finish the POST request for :id/comments
+router.post(":id/comments", (req, res) => {
+  const { id } = req.params;
+  console.log(id);
+
+  // insertComment(comment)
+});
+
+// Removes the post with the specified id and returns the deleted
+// post object. You may need to make additional calls to the
+// database in order to satisfy this requirement.
+
+
+// TODO finish the DELETE request for :/id
+router.delete(":/id", (req, res) => {
+  const { id } = req.params;
+
+  findById(id)
+    .remove(id)
+    .then((post) => {
+      status(200).json(id);
+    });
+});
+
+// TODO finish the PUT request for :/id
 router.put(":/id", (req, res) => {});
 
 module.exports = router;
