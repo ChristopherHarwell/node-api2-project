@@ -6,6 +6,7 @@ const {
   insertComment,
   findCommentById,
   remove,
+  findPostComments
 } = require("../data/db.js");
 
 const router = express.Router();
@@ -88,17 +89,44 @@ router.post("/", (req, res) => {
 */
 
 // TODO finish the POST request for :id/comments
-router.post(":id/comments", (req, res) => {
+router.post("/:id/comments", (req, res) => {
   const { id } = req.params;
-  console.log(id);
+  const comment = req.body;
+  const { text } = req.body;
 
-  // insertComment(comment)
+  if (!text) {
+    res
+      .status(400)
+      .json({ errorMessage: "Please provide text for the comment" });
+  } else if (text) {
+    findById(id).then((post) => {
+      if (post.length === 0) {
+        res.status(404).json({
+          errorMessage: "The post with the specified ID does not exist.",
+        });
+      } else if (post.length === 1) {
+        insertComment(comment)
+          .then((commentId) => {
+            findPostComments(id).then((post) => {
+              if (post.length > 0) {
+                res.status(201).json({data: comment});
+              } else {
+                res.status(500).json({
+                  errorMessage:
+                    "There was an error while saving the comment to the database.",
+                });
+              }
+            });
+          })
+          .catch((err) => console.log(err));
+      }
+    });
+  }
 });
 
 // Removes the post with the specified id and returns the deleted
 // post object. You may need to make additional calls to the
 // database in order to satisfy this requirement.
-
 
 // TODO finish the DELETE request for :/id
 router.delete(":/id", (req, res) => {
