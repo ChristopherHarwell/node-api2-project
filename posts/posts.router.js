@@ -6,7 +6,8 @@ const {
   insertComment,
   findCommentById,
   remove,
-  findPostComments
+  findPostComments,
+  update,
 } = require("../data/db.js");
 
 const router = express.Router();
@@ -42,9 +43,6 @@ router.get("/:id", (req, res) => {
   }
 });
 
-// Returns an array of all the comment
-// objects associated with the post with the specified id.
-//TODO test this after making a post request that adds comments
 router.get("/:id/comments", (req, res) => {
   const { id } = req.params;
   try {
@@ -74,54 +72,29 @@ router.post("/", (req, res) => {
   }
 });
 
-// Creates a comment for the post with the specified
-// id using information sent inside of the request body.
-
-/**
- * insertComment(): calling insertComment while passing 
- * it a comment object will add it to the database and 
- * return a promise that resolves to an object with the 
- * id of the inserted comment. The object looks like this: 
- * { id: 123 }. This method will throw an error if the post
- * _id field in the comment object does not match a valid 
- * post id in the database.
-
-*/
-
-// TODO finish the POST request for :id/comments
 router.post("/:id/comments", (req, res) => {
+  //TODO figure out how to refactor this code
   const { id } = req.params;
-  const comment = req.body;
   const { text } = req.body;
 
   if (!text) {
     res
       .status(400)
       .json({ errorMessage: "Please provide text for the comment" });
-  } else if (text) {
-    findById(id).then((post) => {
-      if (post.length === 0) {
-        res.status(404).json({
-          errorMessage: "The post with the specified ID does not exist.",
-        });
-      } else if (post.length === 1) {
-        insertComment(comment)
-          .then((commentId) => {
-            findPostComments(id).then((post) => {
-              if (post.length > 0) {
-                res.status(201).json({data: comment});
-              } else {
-                res.status(500).json({
-                  errorMessage:
-                    "There was an error while saving the comment to the database.",
-                });
-              }
-            });
-          })
-          .catch((err) => console.log(err));
-      }
-    });
   }
+  findById(id).then((post) => {
+    if (post === undefined) {
+      res.status(404).json({
+        errorMessage: "The post with the specified ID does not exist.",
+      });
+    }
+
+    insertComment({ post_id: id, text: text })
+      .then((comment) => {
+        res.status(201).json(comment);
+      })
+      .catch((err) => console.log(err));
+  });
 });
 
 // Removes the post with the specified id and returns the deleted
@@ -132,14 +105,33 @@ router.post("/:id/comments", (req, res) => {
 router.delete(":/id", (req, res) => {
   const { id } = req.params;
 
-  findById(id)
-    .remove(id)
-    .then((post) => {
-      status(200).json(id);
-    });
+  // findById(id)
+  //   .remove(id)
+  //   .then((post) => {
+  //     status(200).json(id);
+  //   });
 });
 
 // TODO finish the PUT request for :/id
-router.put(":/id", (req, res) => {});
+router.put(":/id", (req, res) => {
+  const { id } = req.params;
+  const { title, contents } = req.body;
+
+  if (!title && !contents) {
+    return res.status(400).json({
+      errorMessage: "Please provide title and contents for the post.",
+    });
+  }
+
+  findById(id).then((post) => {
+    post === undefined
+      ? res
+          .status(404)
+          .json({ message: "The post with the specified ID does not exist." })
+      : update(id, { title: title, contents: contents }).then((post) =>
+          res.status(200).json(post)
+        );
+  });
+});
 
 module.exports = router;
