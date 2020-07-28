@@ -104,12 +104,17 @@ router.post("/:id/comments", (req, res) => {
 // TODO finish the DELETE request for :/id
 router.delete(":/id", (req, res) => {
   const { id } = req.params;
-
-  // findById(id)
-  //   .remove(id)
-  //   .then((post) => {
-  //     status(200).json(id);
-  //   });
+  try {
+    findById(id).then((post) => {
+      post === undefined
+        ? res
+            .status(404)
+            .json({ message: "The post with the specified ID does not exist." })
+        : remove(id).then((post) => res.status(200).json({data: post}));
+    });
+  } catch (error) {
+    res.status(500).json({ error: "The post could not be removed" });
+  }
 });
 
 // TODO finish the PUT request for :/id
