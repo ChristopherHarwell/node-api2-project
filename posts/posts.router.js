@@ -73,7 +73,6 @@ router.post("/", (req, res) => {
 });
 
 router.post("/:id/comments", (req, res) => {
-  //TODO figure out how to refactor this code
   const { id } = req.params;
   const { text } = req.body;
 
@@ -101,7 +100,7 @@ router.post("/:id/comments", (req, res) => {
 // post object. You may need to make additional calls to the
 // database in order to satisfy this requirement.
 
-// TODO finish the DELETE request for :/id
+// TODO fix bugs in the DELETE request for :/id
 router.delete(":/id", (req, res) => {
   const { id } = req.params;
   try {
@@ -117,7 +116,7 @@ router.delete(":/id", (req, res) => {
   }
 });
 
-// TODO finish the PUT request for :/id
+// TODO fix bugs in the PUT request for :/id
 router.put(":/id", (req, res) => {
   const { id } = req.params;
   const { title, contents } = req.body;
