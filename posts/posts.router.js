@@ -101,34 +101,43 @@ router.post("/:id/comments", (req, res) => {
 // database in order to satisfy this requirement.
 
 // TODO fix bugs in the DELETE request for :/id
-router.delete(":/id", (req, res) => {
+router.delete("/:id", (req, res) => {
   const { id } = req.params;
-  try {
-    findById(id).then((post) => {
-      post === undefined
-        ? res
-            .status(404)
-            .json({ message: "The post with the specified ID does not exist." })
-        : remove(id).then((post) => res.status(200).json({data: post}));
-    });
-  } catch (error) {
-    res.status(500).json({ error: "The post could not be removed" });
-  }
-});
+  const { text } = req.body;
 
+  findById(id).then((post) => {
+    post === 0
+      ? res
+          .status(404)
+          .json({ message: "The post with the specified ID does not exist." })
+      : remove(id).then((removedPost) => {
+          if (removedPost === 1) {
+            find().then((posts) => {
+              if (post) {
+                res.status(200).json(post);
+              } else {
+                res
+                  .status(500)
+                  .json({ error: "The post could not be removed" });
+              }
+            });
+          }
+        });
+  });
+});
 // TODO fix bugs in the PUT request for :/id
-router.put(":/id", (req, res) => {
+router.put("/:id", (req, res) => {
   const { id } = req.params;
   const { title, contents } = req.body;
 
-  if (!title && !contents) {
+  if (!title || !contents) {
     return res.status(400).json({
       errorMessage: "Please provide title and contents for the post.",
     });
   }
 
   findById(id).then((post) => {
-    post === undefined
+    post === 0
       ? res
           .status(404)
           .json({ message: "The post with the specified ID does not exist." })
