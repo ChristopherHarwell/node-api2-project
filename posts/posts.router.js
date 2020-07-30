@@ -100,7 +100,6 @@ router.post("/:id/comments", (req, res) => {
 // post object. You may need to make additional calls to the
 // database in order to satisfy this requirement.
 
-// TODO fix bugs in the DELETE request for :/id
 router.delete("/:id", (req, res) => {
   const { id } = req.params;
   const { text } = req.body;
@@ -137,13 +136,19 @@ router.put("/:id", (req, res) => {
   }
 
   findById(id).then((post) => {
-    post === 0
+    post.length === 0
       ? res
           .status(404)
           .json({ message: "The post with the specified ID does not exist." })
-      : update(id, { title: title, contents: contents }).then((post) =>
-          res.status(200).json(post)
-        );
+      : update(id, req.body).then((posted) => {
+          if (posted === 1) {
+            res.status(200).json(post);
+          } else {
+            res.status(500).json({
+              errorMessage: "The post information could not be modified.",
+            });
+          }
+        });
   });
 });
 
